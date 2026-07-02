@@ -99,3 +99,19 @@ def update_habit(
     db.refresh(habit)
 
     return habit
+
+def update_habit(
+    db: Session,
+    habit: Habit,
+    title: str,
+    description: str,
+    frequency,
+):
+    habit.title = title
+    habit.description = description
+    habit.frequency = frequency
+
+    db.commit()
+    db.refresh(habit)
+
+    return habit
