@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   CheckSquare,
+  CheckCircle,
   BarChart3,
   Brain,
   Settings,
@@ -13,6 +14,11 @@ const menuItems = [
   { name: "Analytics", icon: BarChart3 },
   { name: "AI Coach", icon: Brain },
   { name: "Settings", icon: Settings },
+  {
+  title: "Habits",
+  icon: CheckCircle,
+  href: "/habits",
+  },
 ];
 
 export default function Sidebar() {

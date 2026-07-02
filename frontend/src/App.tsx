@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import Habits from "./pages/Habits";
 
 export default function App() {
   return (
@@ -17,6 +18,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/habits"
+        element={
+           <ProtectedRoute>
+             <Habits />
+           </ProtectedRoute>
+        }
+     />
     </Routes>
   );
 }
