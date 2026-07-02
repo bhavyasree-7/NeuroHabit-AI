@@ -1,6 +1,11 @@
-from sqlalchemy import Column, Integer, Date, ForeignKey
-from sqlalchemy.sql import func
+from sqlalchemy import (
+    Column,
+    Integer,
+    Date,
+    ForeignKey,
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from app.database import Base
 
@@ -21,4 +26,7 @@ class HabitLog(Base):
         server_default=func.current_date(),
     )
 
-    habit = relationship("Habit")
+    habit = relationship(
+        "Habit",
+        back_populates="logs",
+    )

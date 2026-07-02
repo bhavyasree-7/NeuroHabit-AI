@@ -1,10 +1,19 @@
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from app.models.habit import Habit
+from app.models.habit_log import HabitLog
 from app.models.user import User
 
 
-def create_habit(db: Session, user: User, title: str, description: str, frequency: str):
+def create_habit(
+    db: Session,
+    user: User,
+    title: str,
+    description: str,
+    frequency,
+):
     habit = Habit(
         title=title,
         description=description,
@@ -27,7 +36,11 @@ def get_habits(db: Session, user: User):
     )
 
 
-def get_habit(db: Session, habit_id: int, user: User):
+def get_habit(
+    db: Session,
+    habit_id: int,
+    user: User,
+):
     return (
         db.query(Habit)
         .filter(
@@ -38,6 +51,35 @@ def get_habit(db: Session, habit_id: int, user: User):
     )
 
 
-def delete_habit(db: Session, habit: Habit):
+def delete_habit(
+    db: Session,
+    habit: Habit,
+):
     db.delete(habit)
     db.commit()
+
+
+def complete_habit(
+    db: Session,
+    habit: Habit,
+):
+    already_completed = (
+        db.query(HabitLog)
+        .filter(
+            HabitLog.habit_id == habit.id,
+            HabitLog.completed_date == date.today(),
+        )
+        .first()
+    )
+
+    if already_completed:
+        return False
+
+    log = HabitLog(
+        habit_id=habit.id,
+    )
+
+    db.add(log)
+    db.commit()
+
+    return True

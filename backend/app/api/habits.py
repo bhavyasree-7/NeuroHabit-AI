@@ -5,7 +5,6 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.habit import (
     HabitCreate,
-    HabitUpdate,
     HabitResponse,
 )
 from app.security import get_current_user
@@ -14,6 +13,7 @@ from app.services.habit_service import (
     get_habits,
     get_habit,
     delete_habit,
+    complete_habit,
 )
 
 router = APIRouter(
@@ -29,11 +29,11 @@ def add_habit(
     current_user: User = Depends(get_current_user),
 ):
     return create_habit(
-        db,
-        current_user,
-        habit.title,
-        habit.description,
-        habit.frequency,
+        db=db,
+        user=current_user,
+        title=habit.title,
+        description=habit.description,
+        frequency=habit.frequency,
     )
 
 
@@ -42,7 +42,44 @@ def list_habits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_habits(db, current_user)
+    return get_habits(
+        db=db,
+        user=current_user,
+    )
+
+
+@router.patch("/{habit_id}/complete")
+def mark_complete(
+    habit_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    habit = get_habit(
+        db=db,
+        habit_id=habit_id,
+        user=current_user,
+    )
+
+    if habit is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Habit not found",
+        )
+
+    success = complete_habit(
+        db=db,
+        habit=habit,
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Habit already completed today",
+        )
+
+    return {
+        "message": "Habit completed successfully"
+    }
 
 
 @router.delete("/{habit_id}")
@@ -51,7 +88,11 @@ def remove_habit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    habit = get_habit(db, habit_id, current_user)
+    habit = get_habit(
+        db=db,
+        habit_id=habit_id,
+        user=current_user,
+    )
 
     if habit is None:
         raise HTTPException(
@@ -59,7 +100,10 @@ def remove_habit(
             detail="Habit not found",
         )
 
-    delete_habit(db, habit)
+    delete_habit(
+        db=db,
+        habit=habit,
+    )
 
     return {
         "message": "Habit deleted successfully"
