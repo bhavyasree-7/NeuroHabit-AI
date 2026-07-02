@@ -14,6 +14,7 @@ from app.services.habit_service import (
     get_habit,
     delete_habit,
     complete_habit,
+    update_habit,
 )
 
 router = APIRouter(
@@ -80,7 +81,32 @@ def mark_complete(
     return {
         "message": "Habit completed successfully"
     }
+@router.put("/{habit_id}", response_model=HabitResponse)
+def edit_habit(
+    habit_id: int,
+    updated_habit: HabitCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    habit = get_habit(
+        db=db,
+        habit_id=habit_id,
+        user=current_user,
+    )
 
+    if habit is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Habit not found",
+        )
+
+    return update_habit(
+        db=db,
+        habit=habit,
+        title=updated_habit.title,
+        description=updated_habit.description,
+        frequency=updated_habit.frequency,
+    )
 
 @router.delete("/{habit_id}")
 def remove_habit(

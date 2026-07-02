@@ -83,3 +83,19 @@ def complete_habit(
     db.commit()
 
     return True
+
+def update_habit(
+    db: Session,
+    habit: Habit,
+    title: str,
+    description: str,
+    frequency,
+):
+    habit.title = title
+    habit.description = description
+    habit.frequency = frequency
+
+    db.commit()
+    db.refresh(habit)
+
+    return habit
