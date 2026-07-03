@@ -22,6 +22,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
+        console.log(
+  "Dashboard Token:",
+  localStorage.getItem("token")
+);
         const data = await getDashboard();
         setDashboard(data);
       } catch (error) {

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.user import UserRegister, UserLogin, UserResponse
+from app.schemas.user import UserRegister, UserResponse
 from app.services.auth_service import (
     create_user,
     authenticate_user,
@@ -10,11 +11,17 @@ from app.services.auth_service import (
 )
 from app.security import create_access_token
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"],
+)
 
 
 @router.post("/register", response_model=UserResponse)
-def register(user: UserRegister, db: Session = Depends(get_db)):
+def register(
+    user: UserRegister,
+    db: Session = Depends(get_db),
+):
     existing = get_user_by_email(db, user.email)
 
     if existing:
@@ -24,36 +31,35 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         )
 
     return create_user(
-        db,
-        user.full_name,
-        user.email,
-        user.password,
+        db=db,
+        full_name=user.full_name,
+        email=user.email,
+        password=user.password,
     )
-from fastapi.security import OAuth2PasswordRequestForm
+
 
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    db_user = authenticate_user(
-        db,
-        form_data.username,   # username contains the email
-        form_data.password,
+    user = authenticate_user(
+        db=db,
+        email=form_data.username,  # username contains the email
+        password=form_data.password,
     )
 
-    if not db_user:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
 
-    token = create_access_token(
-        {"sub": db_user.email}
+    access_token = create_access_token(
+        {"sub": user.email}
     )
 
     return {
-        "access_token": token,
+        "access_token": access_token,
         "token_type": "bearer",
     }
-

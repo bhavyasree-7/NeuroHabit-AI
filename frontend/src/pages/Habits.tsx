@@ -14,26 +14,19 @@ export default function Habits() {
     loadHabits();
   }, []);
 
-  const loadHabits = async () => {
-    try {
-      const data = await getHabits();
-      setHabits(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const loadHabits = async () => {
+  try {
+    const data = await getHabits();
 
-  if (loading) {
-    return (
-      <Layout>
-        <h2 className="text-2xl font-bold">
-          Loading habits...
-        </h2>
-      </Layout>
-    );
+    console.log("Habits:", data);
+
+    setHabits(data);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
   }
+};
 
   return (
     <Layout>
